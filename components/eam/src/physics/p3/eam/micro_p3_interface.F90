@@ -572,6 +572,13 @@ end subroutine micro_p3_readnl
    call addfld ('FREQI', (/ 'lev' /), 'A', 'fraction', 'Fractional occurrence of ice'                             )
 
    ! Average cloud top particle size and number (liq, ice) and frequency
+   ! JMN - added ACTNL, ACTNI, ACTREL, ACTREI, FCTL, FCTI
+   call addfld ('ACTREL', horiz_only,    'A', 'Micron', 'Average Cloud Top droplet effective radius'              )
+   call addfld ('ACTREI', horiz_only,    'A', 'Micron', 'Average Cloud Top ice effective radius'                  )
+   call addfld ('ACTNL', horiz_only,    'A', 'm-3', 'Average Cloud Top droplet number'                        )
+   call addfld ('ACTNI', horiz_only,    'A', 'm-3', 'Average Cloud Top ice number'                            )
+   call addfld ('FCTL', horiz_only,    'A', 'fraction', 'Fractional occurrence of cloud top liquid'                )
+   call addfld ('FCTI', horiz_only,    'A', 'fraction', 'Fractional occurrence of cloud top ice'                   )
    call addfld ('REL', (/ 'lev' /), 'A', 'micron', 'REL stratiform cloud effective radius liquid')
    call addfld ('REI', (/ 'lev' /), 'A', 'micron', 'REI stratiform cloud effective radius ice')
 
