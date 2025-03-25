@@ -85,7 +85,7 @@ def buildlib(bldroot, installpath, case):
     # PIO_LIBDIR, PIO_INCDIR, PIO_TYPENAME_VALID_VALUES
     # also defined in the environment.  In this case we
     # will use the installed pio and not build it here.
-    installed_pio_version = os.environ.get("PIO_VERSION_MAJOR")
+    installed_pio_version = None # os.environ.get("PIO_VERSION_MAJOR")
     logger.info(f"pio_version_major = {installed_pio_version} pio_version = {pio_version}")
     if installed_pio_version is not None and int(installed_pio_version) == pio_version:
         logger.info("Using installed PIO library")
