@@ -1,12 +1,15 @@
+! JMN - added SO2+O3 and SO2+H2O2 aqueous reaction rate scale factors, 2024-07-02
 
 module MO_SETSOX
 
   use shr_kind_mod, only : r8 => shr_kind_r8
   use cam_logfile,  only : iulog
+  use cam_abortutils,      only: endrun
 
   private
   public :: sox_inti, setsox
   public :: has_sox
+  public :: mo_setsox_readnl
 
   save
   logical            ::  inv_o3
@@ -21,7 +24,60 @@ module MO_SETSOX
   logical :: cloud_borne = .false.
   logical :: modal_aerosols = .false.
 
+  ! Namelist variables
+  real(r8) :: so2_o3_aqrx_scale = 1._r8
+  real(r8) :: so2_h2o2_aqrx_scale = 1._r8
+
 contains
+
+!=============================================================================
+  ! reads aerosol namelist options  !=============================================================================
+  subroutine mo_setsox_readnl(nlfile)
+
+    use namelist_utils,  only: find_group_name
+    use units,           only: getunit, freeunit
+    use mpishorthand
+    use spmd_utils,     only: masterproc  ! JMN - not sure about this?
+
+    character(len=*), intent(in) :: nlfile  ! filepath for file contain!ing namelist input
+
+    ! Namelist variables
+    !real(r8) :: so2_o3_aqrx_scale = 1.0_r8  
+    !real(r8) :: so2_h2o2_aqrx_scale = 1.0_r8  
+
+    ! Local variables
+    integer :: unitn, ierr
+    character(len=*), parameter :: subname = 'mo_setsox_readnl'
+    
+    ! Namelist variables
+    namelist /mo_setsox_nl/ so2_o3_aqrx_scale, so2_h2o2_aqrx_scale
+    
+    !-----------------------------------------------------------------------------
+
+     !Read namelist
+    if (masterproc) then
+       unitn = getunit()
+       open( unitn, file=trim(nlfile), status='old' )
+       call find_group_name(unitn, 'mo_setsox_nl', status=ierr)
+       if (ierr == 0) then
+          read(unitn, mo_setsox_nl, iostat=ierr)
+          if (ierr /= 0) then
+             call endrun(subname // ':: ERROR reading namelist')
+          end if
+       end if
+       close(unitn)
+       call freeunit(unitn)
+
+    end if
+
+#ifdef SPMD
+    ! Broadcast namelist variables
+    call mpibcast(so2_o3_aqrx_scale, 1, mpir8,   0, mpicom)
+    call mpibcast(so2_h2o2_aqrx_scale, 1, mpir8,   0, mpicom)
+
+#endif
+
+  end subroutine mo_setsox_readnl
 
 !-----------------------------------------------------------------------      
 !-----------------------------------------------------------------------      
@@ -745,13 +801,13 @@ contains
           !------------------------------------------------------------------------
           rah2o2 = 8.e4_r8 * EXP( -3650._r8*work1(i) )  &
                / (.1_r8 + xph(i,k))
-
+          rah2o2 = rah2o2 * so2_h2o2_aqrx_scale
           !------------------------------------------------------------------------
           !        ... S(IV)+ O3
           !------------------------------------------------------------------------
           rao3   = 4.39e11_r8 * EXP(-4131._r8/tz)  &
                + 2.56e3_r8  * EXP(-996._r8 /tz) /xph(i,k)
-
+          rao3 = rao3 * so2_o3_aqrx_scale
           !-----------------------------------------------------------------
           !       ... Prediction after aqueous phase
           !       so4

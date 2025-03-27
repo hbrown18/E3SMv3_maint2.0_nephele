@@ -1,6 +1,7 @@
 !===============================================================================
 ! Modal Aerosol Model
 ! JUly 2015 B.Singh Added unified convection code
+! JMN - moved sol_factb to the namelist (as aer_sol_factb), 2024-07-08
 !===============================================================================
 module aero_model
   use shr_kind_mod,   only: r8 => shr_kind_r8
@@ -100,6 +101,7 @@ module aero_model
   real(r8)          :: sol_facti_cloud_borne = 1._r8
   real(r8)          :: sol_factb_interstitial  = 0.1_r8
   real(r8)          :: sol_factic_interstitial = 0.4_r8
+  real(r8)          :: aer_sol_factb = 0.1_r8
   real(r8)          :: seasalt_emis_scale
   real(r8)          :: small = 1.e-36
 
@@ -132,8 +134,7 @@ contains
     character(len=16) :: aer_drydep_list(pcnst) = ' '
     namelist /aerosol_nl/ aer_wetdep_list, aer_drydep_list,          &
              sol_facti_cloud_borne, seasalt_emis_scale, sscav_tuning, &
-       sol_factb_interstitial, sol_factic_interstitial
-
+       sol_factb_interstitial, sol_factic_interstitial, aer_sol_factb
     !-----------------------------------------------------------------------------
 
     ! Read namelist
@@ -158,6 +159,7 @@ contains
     call mpibcast(aer_drydep_list,   len(aer_drydep_list(1))*pcnst, mpichar, 0, mpicom)
     call mpibcast(sol_facti_cloud_borne, 1,                         mpir8,   0, mpicom)
     call mpibcast(sol_factb_interstitial, 1,                        mpir8,   0, mpicom)
+    call mpibcast(aer_sol_factb, 1,                                 mpir8,   0, mpicom)
     call mpibcast(sol_factic_interstitial, 1,                       mpir8,   0, mpicom)
     call mpibcast(sscav_tuning,          1,                         mpilog,  0, mpicom)
     call mpibcast(seasalt_emis_scale, 1, mpir8,   0, mpicom)
@@ -1800,7 +1802,8 @@ lphase_loop_aa: &
              if (sscav_tuning) then
                 sol_factb  = 0.03_r8   ! all below-cloud scav ON (0.1 "tuning factor")  ! tuned 1/6
              else
-                sol_factb  = 0.1_r8    ! all below-cloud scav ON (0.1 "tuning factor")
+                sol_factb  = aer_sol_factb ! Use the namelist value
+                ! sol_factb  = 0.1_r8    ! all below-cloud scav ON (0.1 "tuning factor")
              endif
 
              ! sol_factb = 0.03_r8 ! all below-cloud scav ON (0.1 "tuning factor") ! tuned 1/6

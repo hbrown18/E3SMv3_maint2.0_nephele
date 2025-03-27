@@ -1,3 +1,4 @@
+! JMN - added SO2+OH gas-phase reaction rate scale factor, 2024-07-02
 
 module mo_usrrxt
 
@@ -10,6 +11,7 @@ module mo_usrrxt
 
   private
   public :: usrrxt, usrrxt_inti, usrrxt_hrates, comp_exp
+  public :: mo_usrrxt_readnl
 
   save
 
@@ -132,7 +134,59 @@ module mo_usrrxt
 
   logical :: has_ion_rxts
 
+  ! Namelist variables
+  real(r8) :: so2_oh_gprx_scale = 1._r8
+
 contains
+
+!=============================================================================
+  ! reads aerosol namelist options  
+!=============================================================================
+  subroutine mo_usrrxt_readnl(nlfile)
+
+    use namelist_utils,  only: find_group_name
+    use units,           only: getunit, freeunit
+    use mpishorthand
+    use spmd_utils,     only: masterproc  ! JMN - not sure about this?
+
+    character(len=*), intent(in) :: nlfile  ! filepath for file containing namelist input
+
+    ! Namelist variables
+    ! real(r8) :: so2_oh_gprx_scale = 1.0_r8  
+  
+    ! Local variables
+    integer :: unitn, ierr
+    character(len=*), parameter :: subname = 'mo_usrrxt_readnl'
+    
+    ! Namelist variables
+    namelist /mo_usrrxt_nl/ so2_oh_gprx_scale
+    
+    !-----------------------------------------------------------------------------
+
+    ! Read namelist
+    if (masterproc) then
+       unitn = getunit()
+       open( unitn, file=trim(nlfile), status='old' )
+       call find_group_name(unitn, 'mo_usrrxt_nl', status=ierr)
+       if (ierr == 0) then
+          read(unitn, mo_usrrxt_nl, iostat=ierr)
+          if (ierr /= 0) then
+             call endrun(subname // ':: ERROR reading namelist')
+          end if
+       end if
+       close(unitn)
+       call freeunit(unitn)
+
+     end if
+
+#ifdef SPMD
+    ! Broadcast namelist variables
+    call mpibcast(so2_oh_gprx_scale, 1, mpir8,   0, mpicom)
+    
+#endif
+
+  end subroutine mo_usrrxt_readnl
+
 
   subroutine usrrxt_inti
     !-----------------------------------------------------------------
@@ -694,6 +748,7 @@ contains
           fc(:) = 3.0e-31_r8 *(300._r8*tinv(:))**3.3_r8
           ko(:) = fc(:)*m(:,k)/(1._r8 + fc(:)*m(:,k)/1.5e-12_r8) 
           rxt(:,k,usr_SO2_OH_ndx) = ko(:)*.6_r8**(1._r8 + (log10(fc(:)*m(:,k)/1.5e-12_r8))**2._r8)**(-1._r8)
+          rxt(:,k,usr_SO2_OH_ndx) = rxt(:,k,usr_SO2_OH_ndx) * so2_oh_gprx_scale
        end if
 !
 ! reduced hydrocarbon scheme
