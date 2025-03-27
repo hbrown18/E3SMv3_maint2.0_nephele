@@ -584,8 +584,9 @@ subroutine dropmixnuc( &
          wtke_cen(i,k) = wsub(i,k)
          wtke(i,k)     = wsub(i,k)
          !--ag
-         wtke_cen(i,k) = max(wtke_cen(i,k), wmixmin)
-         wtke(i,k)     = max(wtke(i,k), wmixmin)
+         !commented out below to avoid reset of microp_aero_wsubmin namelist parameter value
+         !wtke_cen(i,k) = max(wtke_cen(i,k), wmixmin)
+         !wtke(i,k)     = max(wtke(i,k), wmixmin)
 
          nsource(i,k) = 0._r8
 
