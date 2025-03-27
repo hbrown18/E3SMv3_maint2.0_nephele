@@ -237,6 +237,8 @@ contains
    use macrop_driver,       only: macrop_driver_readnl
    use microp_driver,       only: microp_driver_readnl
    use microp_aero,         only: microp_aero_readnl
+   use mo_usrrxt,           only: mo_usrrxt_readnl
+   use MO_SETSOX,           only: mo_setsox_readnl
    use subcol,              only: subcol_readnl
    use cloud_fraction,      only: cldfrc_readnl
    use cldfrc2m,            only: cldfrc2m_readnl
@@ -505,6 +507,8 @@ contains
    call macrop_driver_readnl(nlfilename)
    call microp_driver_readnl(nlfilename)
    call microp_aero_readnl(nlfilename)
+   call mo_usrrxt_readnl(nlfilename)
+   call mo_setsox_readnl(nlfilename)
    call clubb_readnl(nlfilename)
    call shoc_readnl(nlfilename)
    call subcol_readnl(nlfilename)
