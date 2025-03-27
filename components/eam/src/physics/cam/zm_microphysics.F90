@@ -5,6 +5,9 @@ module  zm_microphysics
 !   CAM Interface for cumulus microphysics
 ! 
 ! Author: Xialiang Song and Guang Zhang, June 2010  
+!
+! JMN - edited 2024-06-28 to add autocon/accretion coefficients and exponents to the namelist
+!
 !---------------------------------------------------------------------------------
 
 use shr_kind_mod,      only: r8=>shr_kind_r8
@@ -376,8 +379,8 @@ subroutine zm_mphy(su,    qu,   mu,   du,   eu,    cmel,  cmei,  zf,   pm,   te,
                    accgrm, accglm, accgslm,accgsrm,accgirm,accgrim,accgrsm,accgsln,accgsrn,   &
                    accgirn,accsrim,acciglm,accigrm,accsirm,accigln,accigrn,accsirn,accgln,    &
                    accgrn ,accilm, acciln ,fallrm ,fallsm ,fallgm ,fallrn ,fallsn ,fallgn,    &
-                   fhmrm  ,dsfm, dsfn, auto_fac, accr_fac, dcs)
-   
+                   fhmrm  ,dsfm, dsfn, auto_fac, accr_fac, qc_autocon_expon, qc_accret_expon, &
+                   nc_autocon_expon, accret_coeff, autocon_coeff,dcs)
 
 ! Purpose:
 ! microphysic parameterization for Zhang-McFarlane convection scheme
@@ -419,6 +422,11 @@ subroutine zm_mphy(su,    qu,   mu,   du,   eu,    cmel,  cmei,  zf,   pm,   te,
   real(r8) rd                                   ! gas constant for dry air
   real(r8) auto_fac                             ! droplet-rain autoconversion enhancement factor  
   real(r8) accr_fac                             ! droplet-rain accretion enhancement factor
+  real(r8) qc_autocon_expon                     ! autoconversion qc exponent
+  real(r8) qc_accret_expon                      ! accretion qc exponent
+  real(r8) nc_autocon_expon                     ! autoconversion nc exponent
+  real(r8) accret_coeff                         ! accretion coefficient
+  real(r8) autocon_coeff                        ! autoconversion coefficient
   real(r8) dcs                                  ! autoconversion size threshold for cloud ice to snow (m)
 
 ! output variables
@@ -1488,8 +1496,8 @@ subroutine zm_mphy(su,    qu,   mu,   du,   eu,    cmel,  cmei,  zf,   pm,   te,
 !                 prc(k) = 1350._r8*qcic(i,k)**2.47_r8*    &
 !                    (ncic(i,k)/1.e6_r8*rho(i,k))**(-1.79_r8)
                  ! parameters with updated values for 72 layer model 
-                 prc(k) = auto_fac*30500._r8*qcic(i,k)**3.19_r8*    &
-                    (ncic(i,k)/1.e6_r8*rho(i,k))**(-1.2_r8)
+                 prc(k) = auto_fac*autocon_coeff*qcic(i,k)**qc_autocon_expon*    &
+                    (ncic(i,k)/1.e6_r8*rho(i,k))**(nc_autocon_expon)
                  nprc1(k) = prc(k)/(qcic(i,k)/ncic(i,k))
                  nprc(k) = prc(k) * (1._r8/droplet_mass_25um)
 
@@ -1959,7 +1967,7 @@ subroutine zm_mphy(su,    qu,   mu,   du,   eu,    cmel,  cmei,  zf,   pm,   te,
               ! gravitational collection kernel, droplet fall speed neglected
 
               if (qric(i,k).ge.qsmall .and. qcic(i,k).ge.qsmall) then
-                 pra(k) = accr_fac*67._r8*(qcic(i,k)*qric(i,k))**1.15_r8
+                 pra(k) = accr_fac*accret_coeff*(qcic(i,k)*qric(i,k))**qc_accret_expon
                  npra(k) = pra(k)/(qcic(i,k)/ncic(i,k))
               else
                  pra(k)=0._r8

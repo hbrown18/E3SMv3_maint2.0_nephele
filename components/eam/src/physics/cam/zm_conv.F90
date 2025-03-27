@@ -14,6 +14,9 @@ module zm_conv
 !
 ! April 2021: X. Song added code for convective microphysics
 ! April 2022: X. Song added code for mass flux adjustment
+!
+! JMN - edited 2024-06-28 to add autocon/accretion coefficients and exponents to the namelist
+!
 !---------------------------------------------------------------------------------
   use shr_kind_mod,    only: r8 => shr_kind_r8
   use spmd_utils,      only: masterproc
@@ -78,6 +81,11 @@ module zm_conv
    real(r8) :: zmconv_tp_fac         = unset_r8
    real(r8) :: zmconv_auto_fac       = unset_r8
    real(r8) :: zmconv_accr_fac       = unset_r8
+   real(r8) :: zmconv_qc_autocon_expon = unset_r8
+   real(r8) :: zmconv_qc_accret_expon = unset_r8
+   real(r8) :: zmconv_nc_autocon_expon = unset_r8
+   real(r8) :: zmconv_accret_coeff   = unset_r8
+   real(r8) :: zmconv_autocon_coeff  = unset_r8
    real(r8) :: zmconv_micro_dcs      = unset_r8
    real(r8) :: zmconv_MCSP_heat_coeff = 0._r8
    real(r8) :: zmconv_MCSP_moisture_coeff = 0._r8
@@ -130,6 +138,11 @@ module zm_conv
    real(r8) :: tp_fac = unset_r8  
    real(r8) :: auto_fac = unset_r8
    real(r8) :: accr_fac = unset_r8
+   real(r8) :: qc_autocon_expon = unset_r8
+   real(r8) :: qc_accret_expon = unset_r8
+   real(r8) :: nc_autocon_expon = unset_r8
+   real(r8) :: accret_coeff = unset_r8
+   real(r8) :: autocon_coeff = unset_r8
    real(r8) :: micro_dcs= unset_r8
 
    logical  :: MCSP
@@ -156,7 +169,9 @@ subroutine zmconv_readnl(nlfile)
            zmconv_dmpdz, zmconv_alfa, zmconv_tiedke_add,     &
            zmconv_cape_cin, zmconv_mx_bot_lyr_adj, zmconv_tp_fac, zmconv_trigdcape_ull, &
            zmconv_trig_dcape_only, zmconv_trig_ull_only, zmconv_microp, zmconv_auto_fac,&
-           zmconv_accr_fac, zmconv_micro_dcs, zmconv_clos_dyn_adj, zmconv_tpert_fix,    &
+           zmconv_accr_fac, zmconv_qc_autocon_expon, zmconv_qc_accret_expon, &
+           zmconv_nc_autocon_expon, zmconv_accret_coeff, zmconv_autocon_coeff, &
+           zmconv_micro_dcs, zmconv_clos_dyn_adj, zmconv_tpert_fix, &
            zmconv_MCSP_heat_coeff, zmconv_MCSP_moisture_coeff, &
            zmconv_MCSP_uwind_coeff, zmconv_MCSP_vwind_coeff   
    !-----------------------------------------------------------------------------
@@ -193,6 +208,11 @@ subroutine zmconv_readnl(nlfile)
       tp_fac           = zmconv_tp_fac
       auto_fac         = zmconv_auto_fac
       accr_fac         = zmconv_accr_fac
+      qc_autocon_expon = zmconv_qc_autocon_expon
+      qc_accret_expon  = zmconv_qc_accret_expon
+      nc_autocon_expon = zmconv_nc_autocon_expon
+      accret_coeff     = zmconv_accret_coeff
+      autocon_coeff    = zmconv_autocon_coeff
       micro_dcs        = zmconv_micro_dcs
       MCSP_heat_coeff  = zmconv_MCSP_heat_coeff
       MCSP_moisture_coeff = zmconv_MCSP_moisture_coeff
@@ -260,6 +280,11 @@ subroutine zmconv_readnl(nlfile)
    call mpibcast(tp_fac,            1, mpir8,  0, mpicom)
    call mpibcast(auto_fac,          1, mpir8,  0, mpicom)
    call mpibcast(accr_fac,          1, mpir8,  0, mpicom)
+   call mpibcast(qc_autocon_expon,  1, mpir8,  0, mpicom)
+   call mpibcast(qc_accret_expon,   1, mpir8,  0, mpicom)
+   call mpibcast(nc_autocon_expon,  1, mpir8,  0, mpicom)
+   call mpibcast(accret_coeff,      1, mpir8,  0, mpicom)
+   call mpibcast(autocon_coeff,     1, mpir8,  0, mpicom)
    call mpibcast(micro_dcs,         1, mpir8,  0, mpicom)  
    call mpibcast(MCSP,              1, mpilog, 0, mpicom)
    call mpibcast(MCSP_heat_coeff,   1, mpir8,  0, mpicom)
@@ -3524,8 +3549,8 @@ subroutine cldprp(lchnk   , &
                     loc_microp_st%accsirn,loc_microp_st%accgln ,loc_microp_st%accgrn ,loc_microp_st%accilm , &
                     loc_microp_st%acciln ,loc_microp_st%fallrm ,loc_microp_st%fallsm ,loc_microp_st%fallgm , &
                     loc_microp_st%fallrn ,loc_microp_st%fallsn ,loc_microp_st%fallgn ,loc_microp_st%fhmrm  , &
-                    dsfm,   dsfn, auto_fac, accr_fac, micro_dcs) 
-
+                    dsfm,   dsfn, auto_fac, accr_fac, qc_autocon_expon, qc_accret_expon, nc_autocon_expon, &
+                    accret_coeff, autocon_coeff, micro_dcs)
 
       do k = pver,msg + 2,-1
          do i = 1,il2g

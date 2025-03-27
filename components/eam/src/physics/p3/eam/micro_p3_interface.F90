@@ -8,6 +8,9 @@ module micro_p3_interface
   !!
   !! Last updated: 2018-09-12
   !!
+  !! JMN - added code from micro_cam_mg.F90 to calculate & output 
+  !!       cloud top variables (ACTREL, ACTREI, ACTNL, ACTNI, FCTL, FCTI);
+  !!       added code was last updated 2024-06-27
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
   use shr_kind_mod,   only: rtype=>shr_kind_r8
@@ -1086,6 +1089,14 @@ end subroutine micro_p3_readnl
     real(rtype) :: icinc(pcols,pver) 
     real(rtype) :: icwnc(pcols,pver) 
 
+    ! JMN - added cloud top variables
+    real(rtype) :: ctrel(pcols)
+    real(rtype) :: ctrei(pcols)
+    real(rtype) :: ctnl(pcols)
+    real(rtype) :: ctni(pcols)
+    real(rtype) :: fcti(pcols)
+    real(rtype) :: fctl(pcols)
+
     ! variables for the CNT primary / heterogeneous freezing
     real(rtype), pointer :: frzimm(:,:)
     real(rtype), pointer :: frzcnt(:,:)
@@ -1565,6 +1576,31 @@ end subroutine micro_p3_readnl
       end do
    end do
 
+   ! JMN - added cloud top effective radius and number
+   ! Cloud top effective radius and number.
+   fcti  = 0._rtype
+   fctl  = 0._rtype
+   ctrel = 0._rtype
+   ctrei = 0._rtype
+   ctnl  = 0._rtype
+   ctni  = 0._rtype
+   do icol = 1, ncol
+      do k = top_lev, pver
+         if ( cld_frac_l(icol,k) > 0.01_rtype .and. icwmrst(icol,k) > 1.e-7_rtype ) then
+            ctrel(icol) = rel(icol,k) * cld_frac_l(icol,k)
+            ctnl(icol)  = icwnc(icol,k) * cld_frac_l(icol,k)
+            fctl(icol)  = cld_frac_l(icol,k)
+            exit
+         end if
+         if ( cld_frac_i(icol,k) > 0.01_rtype .and. icimrst(icol,k) > 1.e-7_rtype ) then
+            ctrei(icol) = rei(icol,k) * cld_frac_i(icol,k)
+            ctni(icol)  = icinc(icol,k) * cld_frac_i(icol,k)
+            fcti(icol)  = cld_frac_i(icol,k)
+            exit
+         end if
+      end do
+   end do
+
    ! note: 1e-6 kgho2/kgair/s * 1000. pa / (9.81 m/s2) / 1000 kgh2o/m3 = 1e-7 m/s
    ! this is 1ppmv of h2o in 10hpa
    ! alternatively: 0.1 mm/day * 1.e-4 m/mm * 1/86400 day/s = 1.e-9
@@ -1626,6 +1662,7 @@ end subroutine micro_p3_readnl
 
     !WRITE OUTPUT
     !=============
+    ! JMN - added ACTREL, ACTREI, ACTNL, ACTNI, FCTL, FCTI
    call outfld('AQRAIN',      aqrain,      psetcols, lchnk)
    call outfld('ANRAIN',      anrain,      psetcols, lchnk)
    call outfld('AREL',        efcout,      pcols,    lchnk)
@@ -1636,6 +1673,12 @@ end subroutine micro_p3_readnl
    call outfld('FREQL',       freql,       pcols,    lchnk)
    call outfld('FREQI',       freqi,       pcols,    lchnk)
    call outfld('FREQR',       freqr,       psetcols, lchnk)
+   call outfld('ACTREL',      ctrel,       pcols, lchnk)
+   call outfld('ACTREI',      ctrei,       pcols, lchnk)
+   call outfld('ACTNL',       ctnl,        pcols, lchnk)
+   call outfld('ACTNI',       ctni,        pcols, lchnk)
+   call outfld('FCTL',        fctl,        pcols, lchnk)
+   call outfld('FCTI',        fcti,        pcols, lchnk)
    call outfld('CDNUMC',      cdnumc,      pcols,    lchnk)
 !<shanyp 05182024
    call outfld('ICIMRST',     icimrst,      pcols,    lchnk)
