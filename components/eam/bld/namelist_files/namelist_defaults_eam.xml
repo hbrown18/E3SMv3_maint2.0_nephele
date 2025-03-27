@@ -1085,6 +1085,8 @@
 
 <sol_factb_interstitial                >0.1D0</sol_factb_interstitial>
 
+<aer_sol_factb                             >0.1D0</aer_sol_factb>
+
 <sol_factic_interstitial                >0.4D0</sol_factic_interstitial>
 
 <!-- sub-column switches for physics packages -->
@@ -1243,6 +1245,11 @@
 <zmconv_tpert_fix                                                     >.false. </zmconv_tpert_fix>
 <zmconv_auto_fac                                                      >7.0D0 </zmconv_auto_fac>
 <zmconv_accr_fac                                                      >1.5D0 </zmconv_accr_fac>
+<zmconv_qc_autocon_expon                                              >3.19D0   </zmconv_qc_autocon_expon>
+<zmconv_qc_accret_expon                                               >1.15D0   </zmconv_qc_accret_expon>
+<zmconv_nc_autocon_expon                                              >-1.20D0   </zmconv_nc_autocon_expon>
+<zmconv_accret_coeff                                                  >67.0D0   </zmconv_accret_coeff>
+<zmconv_autocon_coeff                                                    >30500.0D0   </zmconv_autocon_coeff>
 <zmconv_micro_dcs                                                     >150.E-6</zmconv_micro_dcs>
 <!-- MCSP -->
 <zmconv_MCSP_heat_coeff                                               >0.0D0</zmconv_MCSP_heat_coeff>
@@ -1919,6 +1926,9 @@ with se_tstep, dt_remap_factor, dt_tracer_factor set to -1
 <seasalt_emis_scale phys="default" chem="linoz_mam4_resus_mom_soag"> 0.6D0      </seasalt_emis_scale>
 <seasalt_emis_scale phys="default" chem="superfast_mam4_resus_mom_soag"> 0.6D0  </seasalt_emis_scale>
 <seasalt_emis_scale phys="default" chem="chemuci_linozv3_mam5_vbs"> 0.55D0 </seasalt_emis_scale>
+<so2_oh_gprx_scale phys="default">1.0D0</so2_oh_gprx_scale>
+<so2_o3_aqrx_scale phys="default">1.0D0</so2_o3_aqrx_scale>
+<so2_h2o2_aqrx_scale phys="default">1.0D0</so2_h2o2_aqrx_scale>
 <dms_emis_scale phys="default"> 2.0D0 </dms_emis_scale>
 <zmconv_trigdcape_ull phys="default"> .true.     </zmconv_trigdcape_ull>
 <zmconv_c0_lnd phys="default" clubb_sgs="1" microphys="p3"> 0.0020D0   </zmconv_c0_lnd>
@@ -1934,6 +1944,7 @@ with se_tstep, dt_remap_factor, dt_tracer_factor set to -1
 <prc_exp1 phys="default"  microphys="mg2"> -1.40D0    </prc_exp1>
 <micro_mg_accre_enhan_fac phys="default" microphys="mg2"> 1.75D0     </micro_mg_accre_enhan_fac>
 <microp_aero_wsubmin               > 0.001D0    </microp_aero_wsubmin>
+<microp_aero_wsub_scale              > 1.0D0      </microp_aero_wsub_scale>
 <so4_sz_thresh_icenuc phys="default"> 0.080e-6   </so4_sz_thresh_icenuc>
 <micro_mg_berg_eff_factor phys="default" clubb_sgs="1"> 0.7D0      </micro_mg_berg_eff_factor>
 <cldfrc_dp1  phys="default"> 0.018D0    </cldfrc_dp1>

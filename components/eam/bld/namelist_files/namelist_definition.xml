@@ -2693,6 +2693,12 @@ Minimum subgrid vertical velocity
 Default: 0.2
 </entry>
 
+<entry id="microp_aero_wsub_scale" type="real" category="microphysics"
+       group="microp_aero_nl" valid_values="" >
+Unitless scaling factor for the liquid droplet subgrid scale vertical velocity during aerosol activation.
+Default: 1.0
+</entry>
+
 <entry id="use_hetfrz_classnuc" type="logical" category="microphys"
        group="phys_ctl_nl" valid_values="" >
 Switch to turn on heterogeneous freezing code.
@@ -2983,6 +2989,36 @@ Default: set by build-namelist
        group="zmconv_nl" valid_values="" >    
 cloud droplet-rain accretion enhancement factor in convective microphysics scheme.      
 Default: set by build-namelist  
+</entry>
+
+<entry id="zmconv_qc_autocon_expon" type="real" category="conv"
+       group="zmconv_nl" valid_values="" >
+Exponent of power function fit used by convective microphysics scheme qc in autoconversion 
+Default: 3.19_rtype
+</entry>
+
+<entry id="zmconv_qc_accret_expon" type="real" category="conv"
+       group="zmconv_nl" valid_values="" >
+Exponent of power function fit used by convective microphysics scheme qc in accretion 
+Default: 1.15_rtype
+</entry>
+
+<entry id="zmconv_nc_autocon_expon" type="real" category="conv"
+       group="zmconv_nl" valid_values="" >
+Exponent of power function fit used by convective microphysics scheme nc in autoconversion 
+Default: -1.2_rtype
+</entry>
+
+<entry id="zmconv_accret_coeff" type="real" category="conv"
+       group="zmconv_nl" valid_values="" >
+Coefficient fit used by convective microphysics scheme in accretion 
+Default: 67._rtype
+</entry>
+
+<entry id="zmconv_autocon_coeff" type="real" category="conv"
+       group="zmconv_nl" valid_values="" >
+Coefficient fit used by convective microphysics scheme in autoconversion 
+Default: 30500._rtype
 </entry>
 
 <entry id="zmconv_micro_dcs" type="real" category="conv"
@@ -4998,10 +5034,34 @@ Flag for wet scavenging tuning
 Default: .false.
 </entry>
 
+<entry id="aer_sol_factb" type="real"  category="cam_chem"
+       group="aerosol_nl" valid_values="" >
+Tuning factor for below-cloud scavenging rate for stratiform clouds; ignored if sscav_tuning=True.
+Default: 0.1
+</entry>
+
 <entry id="seasalt_emis_scale" type="real" category="cam_chem"
        group="aerosol_nl" valid_values="" >
 Seasalt aerosol emission tuning factor
 Default: set by build-namelist.
+</entry>
+
+<entry id="so2_oh_gprx_scale" type="real" category="cam_chem"
+       group="mo_usrrxt_nl" valid_values="" >
+SO2 + OH gas-phase reaction rate scale factor.
+Default: 1.0
+</entry>
+
+<entry id="so2_o3_aqrx_scale" type="real" category="cam_chem"
+       group="mo_setsox_nl" valid_values="" >
+SO2 + O3 aqueous reaction rate scale factor.
+Default: 1.0
+</entry>
+
+<entry id="so2_h2o2_aqrx_scale" type="real" category="cam_chem"
+       group="mo_setsox_nl" valid_values="" >
+SO2 + H2O2 aqueous reaction rate scale factor.
+Default: 1.0
 </entry>
 
 <entry id="dms_emis_scale" type="real" category="cam_chem"
