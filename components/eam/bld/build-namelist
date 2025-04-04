@@ -3951,7 +3951,7 @@ my $aerocom_ind3 = $nl->get_value('do_aerocom_ind3');
 #in-cloud scav tuning for cloud-borne aerosol
 if ($chem =~ /_mam/) {
     add_default($nl, 'sol_facti_cloud_borne');
-    add_default($nl, 'sol_factb_interstitial')
+    add_default($nl, 'sol_factb_interstitial');
     add_default($nl, 'aer_sol_factb');
     add_default($nl, 'sol_factic_interstitial');
 }
