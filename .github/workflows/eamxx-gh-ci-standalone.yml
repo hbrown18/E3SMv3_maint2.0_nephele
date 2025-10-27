@@ -52,7 +52,7 @@ jobs:
           ./components/eamxx/scripts/test-all-scream -m ghci-oci -t ${{ matrix.test }} -c BUILD_SHARED_LIBS=ON
       - 
         name: Artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         if: ${{ always() }}
         with:
           name: ${{ matrix.test }}
